@@ -121,7 +121,7 @@ gboolean psf_exec (Psf *obj,
       printf ("_______\n");
       printf ("error : \n"); printf ("%s", buf_stderr);
       printf ("_______\n");
-      printf ("code retour : %d\n", status);
+      printf ("code retour : %d\n", WEXITSTATUS(status));
       printf ("_______\n");
       *ret = status;
     }

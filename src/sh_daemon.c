@@ -70,10 +70,13 @@ gboolean psf_exec (Psf *obj,
   int pipefd[2];
   char* arg[32];
 
-  printf ("process : %s\n", process);
+  // fill arg structure
 
+  // fill arg 0 with process name
   arg[0] = malloc (strlen ((char*)basename(process_name)) + 1);
   strcpy (arg[0], (char*)basename(process_name));
+
+  //fill the other field of array with arguments
   for (i = 0,j = 1; args[i] != NULL; i++, j++)
   {
     arg[j] = malloc (strlen (args[i]));

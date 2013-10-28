@@ -10,11 +10,11 @@
 #define SH_DAEMON_H
 
 typedef struct {
-    GObject parent;
+  GObject parent;
 } Psf;
 
 typedef struct {
-    GObjectClass parent;
+  GObjectClass parent;
 } PsfClass;
 
 GType psf_get_type(void);
@@ -30,11 +30,11 @@ GType psf_get_type(void);
 G_DEFINE_TYPE(Psf, psf, G_TYPE_OBJECT)
 
 gboolean psf_exec (Psf *obj,
-		   const char* process_name,
 		   char** args,
 		   gint* ret,
 		   char** output,
-		   GError** error);
+		   char** error,
+		   GError** gerror);
 
 #ifndef __dbus_glib_marshal_psf_MARSHAL_H__
 #define __dbus_glib_marshal_psf_MARSHAL_H__
@@ -90,29 +90,28 @@ G_BEGIN_DECLS
 #endif /* !G_ENABLE_DEBUG */
 
 
-/* BOOLEAN:STRING,BOXED,POINTER,POINTER,POINTER */
-extern void dbus_glib_marshal_psf_BOOLEAN__STRING_BOXED_POINTER_POINTER_POINTER (GClosure     *closure,
-                                                                                        GValue       *return_value,
-                                                                                        guint         n_param_values,
-                                                                                        const GValue *param_values,
-                                                                                        gpointer      invocation_hint,
-                                                                                        gpointer      marshal_data);
+extern void dbus_glib_marshal_psf_BOOLEAN__BOXED_POINTER_POINTER_POINTER_POINTER (GClosure     *closure,
+                                                                                  GValue       *return_value,
+                                                                                  guint         n_param_values,
+                                                                                  const GValue *param_values,
+                                                                                  gpointer      invocation_hint,
+                                                                                  gpointer      marshal_data);
 void
-dbus_glib_marshal_psf_BOOLEAN__STRING_BOXED_POINTER_POINTER_POINTER (GClosure     *closure,
-                                                                            GValue       *return_value G_GNUC_UNUSED,
-                                                                            guint         n_param_values,
-                                                                            const GValue *param_values,
-                                                                            gpointer      invocation_hint G_GNUC_UNUSED,
-                                                                            gpointer      marshal_data)
+dbus_glib_marshal_psf_BOOLEAN__BOXED_POINTER_POINTER_POINTER_POINTER (GClosure     *closure,
+                                                                      GValue       *return_value G_GNUC_UNUSED,
+                                                                      guint         n_param_values,
+                                                                      const GValue *param_values,
+                                                                      gpointer      invocation_hint G_GNUC_UNUSED,
+                                                                      gpointer      marshal_data)
 {
-  typedef gboolean (*GMarshalFunc_BOOLEAN__STRING_BOXED_POINTER_POINTER_POINTER) (gpointer     data1,
-                                                                                  gpointer     arg_1,
-                                                                                  gpointer     arg_2,
-                                                                                  gpointer     arg_3,
-                                                                                  gpointer     arg_4,
-                                                                                  gpointer     arg_5,
-                                                                                  gpointer     data2);
-  register GMarshalFunc_BOOLEAN__STRING_BOXED_POINTER_POINTER_POINTER callback;
+  typedef gboolean (*GMarshalFunc_BOOLEAN__BOXED_POINTER_POINTER_POINTER_POINTER) (gpointer     data1,
+                                                                                   gpointer     arg_1,
+                                                                                   gpointer     arg_2,
+                                                                                   gpointer     arg_3,
+                                                                                   gpointer     arg_4,
+                                                                                   gpointer     arg_5,
+                                                                                   gpointer     data2);
+  register GMarshalFunc_BOOLEAN__BOXED_POINTER_POINTER_POINTER_POINTER callback;
   register GCClosure *cc = (GCClosure*) closure;
   register gpointer data1, data2;
   gboolean v_return;
@@ -130,11 +129,11 @@ dbus_glib_marshal_psf_BOOLEAN__STRING_BOXED_POINTER_POINTER_POINTER (GClosure   
       data1 = g_value_peek_pointer (param_values + 0);
       data2 = closure->data;
     }
-  callback = (GMarshalFunc_BOOLEAN__STRING_BOXED_POINTER_POINTER_POINTER) (marshal_data ? marshal_data : cc->callback);
+  callback = (GMarshalFunc_BOOLEAN__BOXED_POINTER_POINTER_POINTER_POINTER) (marshal_data ? marshal_data : cc->callback);
 
   v_return = callback (data1,
-                       g_marshal_value_peek_string (param_values + 1),
-                       g_marshal_value_peek_boxed (param_values + 2),
+                       g_marshal_value_peek_boxed (param_values + 1),
+                       g_marshal_value_peek_pointer (param_values + 2),
                        g_marshal_value_peek_pointer (param_values + 3),
                        g_marshal_value_peek_pointer (param_values + 4),
                        g_marshal_value_peek_pointer (param_values + 5),
@@ -149,7 +148,6 @@ G_END_DECLS
 
 #include <dbus/dbus-glib.h>
 static const DBusGMethodInfo dbus_glib_psf_methods[] = {
-  { (GCallback) psf_exec, dbus_glib_marshal_psf_BOOLEAN__STRING_BOXED_POINTER_POINTER_POINTER, 0 },
+  { (GCallback) psf_exec, dbus_glib_marshal_psf_BOOLEAN__BOXED_POINTER_POINTER_POINTER_POINTER, 0 },
 };
-
 #endif

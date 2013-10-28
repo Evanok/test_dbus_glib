@@ -18,8 +18,9 @@
 #include "../include/sh_daemon.h"
 
 DBusGObjectInfo dbus_glib_psf_object_info;
-#define EXEC_PATH_SIZE 64
-const char* exec_path = "\0exec\0S\0process_name\0I\0s\0args\0I\0as\0ret\0O\0F\0N\0i\0output\0O\0F\0N\0s\0\0\0";
+#define EXEC_PATH_SIZE 128
+const char* exec_path = "\0exec\0S\0args\0I\0as\0ret\0O\0F\0N\0i\0output\0O\0F\0N\0s\0error\0O\0F\0N\0s\0\0\0";
+const char *process = NULL;
 
 void init_dbus_gobject_info (DBusGObjectInfo* dbus_glib_psf_object_info, const char* dbus_name)
 {
@@ -58,66 +59,71 @@ static void psf_class_init(PsfClass *klass)
 
 
 gboolean psf_exec (Psf *obj,
-		   const char* process_name,
 		   char** args,
 		   gint* ret,
 		   char** output,
-		   GError** error)
+		   char** error,
+		   GError** gerror)
 {
   int i, j;
   pid_t pid;
   int status = -42;
-  int pipefd[2];
-  char* arg[32];
+  int pipefd_out[2];
+  int pipefd_err[2];
 
-  // fill arg structure
-
-  // fill arg 0 with process name
-  arg[0] = malloc (strlen ((char*)basename(process_name)) + 1);
-  strcpy (arg[0], (char*)basename(process_name));
-
-  //fill the other field of array with arguments
-  for (i = 0,j = 1; args[i] != NULL; i++, j++)
+  if (strcmp (process, args[0]) != 0)
   {
-    arg[j] = malloc (strlen (args[i]));
-    strcpy (arg[j], args[i]);
+    fprintf(stderr, "Process %s : Permission denied\n", args[0]);
+    return TRUE;
   }
-  arg[j] = NULL;
 
-  pipe(pipefd);
+  pipe(pipefd_out);
+  pipe(pipefd_err);
   pid = fork ();
+
   if (pid == 0)
   {
-    close(pipefd[0]);
+    close(pipefd_out[0]);
+    close(pipefd_err[0]);
 
-    dup2(pipefd[1], 1);
-    dup2(pipefd[1], 2);
+    dup2(pipefd_out[1], 1);
+    dup2(pipefd_err[1], 2);
 
-    close(pipefd[1]);
+    close(pipefd_out[1]);
+    close(pipefd_err[1]);
 
-    execvp (process_name, arg);
+    execvp (process, args);
     perror ("execv");
-    return 42;
+    return TRUE;
   }
   else if (pid == -1)
   {
     perror ("fork");
-    return FALSE;
+    return TRUE;
   }
   else
   {
     if (waitpid(pid, &status, 0) == -1)
     {
       perror ("waitpid");
-      return FALSE;
+    return TRUE;
     }
     else
     {
-      char buffer[1024];
-      close(pipefd[1]);
-      while (read(pipefd[0], buffer, sizeof(buffer)) != 0);
-      printf ("output : \n"); printf ("%s", buffer);
+      char buf_stderr[1024];
+      char buf_stdout[1024];
+      close(pipefd_out[1]);
+      close(pipefd_err[1]);
+      while (read(pipefd_out[0], buf_stdout, sizeof(buf_stdout)) != 0);
+      while (read(pipefd_err[0], buf_stderr, sizeof(buf_stderr)) != 0);
+      printf ("_______\n");
+      printf ("output : \n"); printf ("%s", buf_stdout);
+      printf ("_______\n");
+      printf ("error : \n"); printf ("%s", buf_stderr);
+      printf ("_______\n");
       printf ("code retour : %d\n", status);
+      printf ("_______\n");
+      *ret = status;
     }
   }
 
@@ -139,7 +145,6 @@ int main(int argc , char **argv)
   guint result;
   GError* error = NULL;
   int opt;
-  const char *process = NULL;
   const char *dbus_path = NULL;
   const char *dbus_name = NULL;
 

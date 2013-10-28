@@ -64,33 +64,56 @@ gboolean psf_exec (Psf *obj,
 		   char** output,
 		   GError** error)
 {
-  int i;
+  int i, j;
   pid_t pid;
   int status = -42;
+  int pipefd[2];
+  char* arg[32];
 
-  printf ("exec process : %s\n", process_name);
-  for (i = 0; args[i] != NULL; i++)
-    printf ("args of process : %s\n", args[i]);
+  printf ("process : %s\n", process);
 
+  arg[0] = malloc (strlen ((char*)basename(process_name)) + 1);
+  strcpy (arg[0], (char*)basename(process_name));
+  for (i = 0,j = 1; args[i] != NULL; i++, j++)
+  {
+    arg[j] = malloc (strlen (args[i]));
+    strcpy (arg[j], args[i]);
+  }
+  arg[j] = NULL;
+
+  pipe(pipefd);
   pid = fork ();
   if (pid == 0)
   {
-    execl (process_name, args, NULL);
+    close(pipefd[0]);
+
+    dup2(pipefd[1], 1);
+    dup2(pipefd[1], 2);
+
+    close(pipefd[1]);
+
+    execvp (process_name, arg);
+    perror ("execv");
+    return 42;
   }
   else if (pid == -1)
   {
-    fprintf(stderr, "Error during fork process\n");
+    perror ("fork");
     return FALSE;
   }
   else
   {
     if (waitpid(pid, &status, 0) == -1)
     {
-      fprintf(stderr, "Error during waitpid process\n");
+      perror ("waitpid");
       return FALSE;
     }
     else
     {
+      char buffer[1024];
+      close(pipefd[1]);
+      while (read(pipefd[0], buffer, sizeof(buffer)) != 0);
+      printf ("output : \n"); printf ("%s", buffer);
       printf ("code retour : %d\n", status);
     }
   }

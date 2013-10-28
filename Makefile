@@ -9,3 +9,6 @@ sh_daemon: src/sh_daemon.o
 clean:
 	find . -name "*.o" -print0 | xargs -0 rm -f
 	rm -f sh_daemon
+
+install:
+	sudo cp conf/* /etc/dbus-1/system.d/.

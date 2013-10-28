@@ -65,14 +65,39 @@ gboolean psf_exec (Psf *obj,
 		   GError** error)
 {
   int i;
+  pid_t pid;
+  int status = -42;
 
   printf ("exec process : %s\n", process_name);
   for (i = 0; args[i] != NULL; i++)
     printf ("args of process : %s\n", args[i]);
 
+  pid = fork ();
+  if (pid == 0)
+  {
+    execl (process_name, args, NULL);
+  }
+  else if (pid == -1)
+  {
+    fprintf(stderr, "Error during fork process\n");
+    return FALSE;
+  }
+  else
+  {
+    if (waitpid(pid, &status, 0) == -1)
+    {
+      fprintf(stderr, "Error during waitpid process\n");
+      return FALSE;
+    }
+    else
+    {
+      printf ("code retour : %d\n", status);
+    }
+  }
+
   return TRUE;
 }
- 
+
 /*
  *
  *
@@ -130,27 +155,25 @@ int main(int argc , char **argv)
   g_type_init();
 
   mainloop = g_main_loop_new(NULL, FALSE);
-  if (mainloop == NULL) 
+  if (mainloop == NULL)
   {
-    printf ("Couldn't create GMainLoop\n");
+    g_warning ("Couldn't create GMainLoop\n");
     return 1;
   }
 
   bus = dbus_g_bus_get(DBUS_BUS_SYSTEM, &error);
-  if (error != NULL) 
+  if (error != NULL)
   {
-    printf ("Couldn't connect to system bus\n");
+    g_warning ("Couldn't connect to system bus\n");
     return 1;
   }
 
   busProxy = dbus_g_proxy_new_for_name(bus, DBUS_SERVICE_DBUS, dbus_path, DBUS_INTERFACE_DBUS);
-  if (busProxy == NULL) 
+  if (busProxy == NULL)
   {
-    printf ("Failed to get a proxy for D-Bus\n");
+    g_warning ("Failed to get a proxy for D-Bus\n");
     return 1;
   }
-
-  printf ("TUTU1\n");
 
   res = dbus_g_proxy_call(busProxy,
 			  "RequestName",
@@ -177,27 +200,23 @@ int main(int argc , char **argv)
     }
     return 1;
   }
-  
-  if (result != 1) 
+
+  if (result != 1)
   {
-    printf ("Failed to get the primary well-known name.\n");
+    g_warning ("Failed to get the primary well-known name.\n");
     return 1;
   }
 
   psf = g_object_new(PSF_TYPE, NULL);
-  if (psf == NULL) 
+  if (psf == NULL)
   {
-    printf ("Failed to create one Value instance.\n");
+    g_warning ("Failed to create one Value instance.\n");
     return 1;
   }
-
-  printf ("dbus path : %s\n", dbus_path);
 
   dbus_g_connection_register_g_object(bus,
                                       dbus_path,
                                       G_OBJECT(psf));
-    
-  printf ("TUTU3\n");
 
   g_main_loop_run(mainloop);
 

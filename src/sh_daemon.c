@@ -124,6 +124,8 @@ gboolean psf_exec (Psf *obj,
       printf ("code retour : %d\n", WEXITSTATUS(status));
       printf ("_______\n");
       *ret = status;
+      *output = strdup(buf_stdout);
+      *error = strdup(buf_stderr);
     }
   }
 

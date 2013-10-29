@@ -22,11 +22,6 @@ DBusGObjectInfo dbus_glib_psf_object_info;
 const char* exec_path = "\0exec\0S\0args\0I\0as\0ret\0O\0F\0N\0i\0output\0O\0F\0N\0s\0error\0O\0F\0N\0s\0\0\0";
 const char *process = NULL;
 
-void die (char* psf_dbus_name)
-{
-  free (psf_dbus_name);
-}
-
 void init_dbus_gobject_info (DBusGObjectInfo* dbus_glib_psf_object_info, const char* dbus_name)
 {
   char* psf_dbus_name = malloc (strlen(dbus_name) + EXEC_PATH_SIZE + 1); 
@@ -138,13 +133,9 @@ gboolean psf_exec (Psf *obj,
   return TRUE;
 }
 
-/*
- *
- *
- */
 int main(int argc , char **argv)
 {
-  GObject* psf;
+  GObject* psf = NULL;
   DBusGConnection* bus = NULL;
   DBusGProxy* busProxy = NULL;
 
@@ -188,7 +179,6 @@ int main(int argc , char **argv)
   if (mainloop == NULL)
   {
     g_warning ("Couldn't create GMainLoop\n");
-    die (dbus_glib_psf_object_info->data);
     return 1;
   }
 
@@ -196,7 +186,6 @@ int main(int argc , char **argv)
   if (error != NULL)
   {
     g_warning ("Couldn't connect to system bus\n");
-    die (dbus_glib_psf_object_info->data);
     return 1;
   }
 
@@ -204,7 +193,6 @@ int main(int argc , char **argv)
   if (busProxy == NULL)
   {
     g_warning ("Failed to get a proxy for D-Bus\n");
-    die (dbus_glib_psf_object_info->data);
     return 1;
   }
 
@@ -231,14 +219,12 @@ int main(int argc , char **argv)
     {
       g_warning ("Failed to acquire %s", dbus_name);
     }
-    die (dbus_glib_psf_object_info->data);
     return 1;
   }
 
   if (result != 1)
   {
     g_warning ("Failed to get the primary well-known name.\n");
-    die (dbus_glib_psf_object_info->data);
     return 1;
   }
 
@@ -246,7 +232,6 @@ int main(int argc , char **argv)
   if (psf == NULL)
   {
     g_warning ("Failed to create one Value instance.\n");
-    die (dbus_glib_psf_object_info->data);
     return 1;
   }
 
@@ -255,7 +240,6 @@ int main(int argc , char **argv)
                                       G_OBJECT(psf));
 
   g_main_loop_run(mainloop);
-  die (dbus_glib_psf_object_info->data);
   return 0;
 }
 

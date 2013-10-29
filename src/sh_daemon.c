@@ -74,6 +74,7 @@ gboolean psf_exec (Psf *obj,
   if (strcmp (process, args[0]) != 0)
   {
     fprintf(stderr, "Process %s : Permission denied\n", args[0]);
+    *ret = -1;
     return TRUE;
   }
 

@@ -29,7 +29,7 @@ void die (char* psf_dbus_name)
 
 void init_dbus_gobject_info (DBusGObjectInfo* dbus_glib_psf_object_info, const char* dbus_name)
 {
-  char* psf_dbus_name = malloc (strlen(dbus_name) + EXEC_PATH_SIZE + 1); // NEED TO FREE ? WHEN ?
+  char* psf_dbus_name = malloc (strlen(dbus_name) + EXEC_PATH_SIZE + 1); 
   int i;
   char* tmp = NULL;
 

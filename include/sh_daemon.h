@@ -18,6 +18,7 @@ typedef struct {
 } PsfClass;
 
 GType psf_get_type(void);
+void init_dbus_gobject_info (DBusGObjectInfo* dbus_glib_psf_object_info, const char* dbus_name);
 
 #define PSF_TYPE (psf_get_type())
 

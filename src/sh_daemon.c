@@ -7,7 +7,7 @@
  *  Created by Pace on 05/07/2013.
  *
  */
-
+#include <sys/wait.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,7 +65,6 @@ gboolean psf_exec (Psf *obj,
 		   char** error,
 		   GError** gerror)
 {
-  int i, j;
   pid_t pid;
   int status = -42;
   int pipefd_out[2];

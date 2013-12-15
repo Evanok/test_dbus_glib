@@ -8,7 +8,7 @@ sh_daemon: src/sh_daemon.o
 	$(CC) -g -gg $(LDFLAGS)  -o $@ $^
 
 conf/$(CONF):
-	@mkdir conf
+	@-mkdir conf
 	@echo "<!DOCTYPE busconfig PUBLIC" > conf/$(CONF)
 	@echo " \"-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN\"" >> conf/$(CONF)
 	@echo "\"http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd\">" >> conf/$(CONF)

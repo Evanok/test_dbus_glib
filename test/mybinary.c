@@ -7,8 +7,12 @@
 
 int main ()
 {
-  sleep(10);
-  printf ("TUTU\n");
-  fprintf (stderr, "TITI\n");
-  exit (0);
+  int i = 0;
+  while (i++ < 20)
+  {
+    sleep(1);
+    printf ("out out out out out out out out\n");
+    fprintf (stderr, "error error error error error\n");
+  }
+  return 0;
 }

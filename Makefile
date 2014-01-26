@@ -24,7 +24,18 @@ conf/$(CONF):
 clean:
 	find . -name "*.o" -print0 | xargs -0 rm -f
 	rm -f sh_daemon
+	rm -f test/mybinary
 	rm -rf conf
+
+./test/mybinary:
+	gcc -o ./test/mybinary ./test/mybinary.c
+
+test_error: all ./test/mybinary
+	@./sh_daemon -e "./test/mybinary"  -n "org.arthurlambert.daemon" -p "/org/arthurlambert/daemon" &
+	@sleep 2
+	@echo "- - - - - - - - - - - - - - - - - - - - - - - - "
+	@echo "Test 1 : My binary"
+	dbus-send --system --print-reply --dest='org.arthurlambert.daemon' /org/arthurlambert/daemon org.arthurlambert.daemon.exec array:string:"./test/mybinary"
 
 test: all
 	@./sh_daemon -e "/bin/ls"  -n "org.arthurlambert.daemon" -p "/org/arthurlambert/daemon" &

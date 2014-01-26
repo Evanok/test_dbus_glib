@@ -1,13 +1,24 @@
-/*
- *  sh_daemon.h
- *
- *
- *  Created by Pace on 05/07/2013.
- *
- */
+/**
+**
+
+** \file sh_daemon.h
+** \brief define sh daemon header
+** \author arthur lambert
+** \date 01/11/13
+**
+**/
 
 #ifndef SH_DAEMON_H
 #define SH_DAEMON_H
+
+#include <sys/wait.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <glib.h>
+#include <errno.h>
+#include <dbus/dbus-glib.h>
 
 typedef struct {
   GObject parent;

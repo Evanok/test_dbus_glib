@@ -7,12 +7,28 @@
 
 int main ()
 {
-  int i = 0;
-  while (i++ < 20)
+  int i, j;
+
+
+  i = 0;
+  for (j = 0; j < 10; j++)
   {
-    sleep(1);
-    printf ("out out out out out out out out\n");
-    fprintf (stderr, "error error error error error\n");
+    while (i++ < 10)
+    {
+      //sleep(1);
+      fprintf (stderr, "[%d][%d] error error error error error\n", j, i);
+    }
+  }
+  sleep(3);
+
+  i = 0;
+  for (j = 0; j < 10; j++)
+  {
+    while (i++ < 10)
+    {
+      sleep(1);
+      printf ("[%d][%d] out out out out out out out out\n", j, i);
+    }
   }
   return 0;
 }

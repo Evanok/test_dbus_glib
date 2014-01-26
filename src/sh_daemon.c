@@ -1,21 +1,10 @@
-/*
- *  sh_daemon.c
- *
- *  This file contains the implementation of the dbus server
- *  for the Pace Security Framework.
- *
- *  Created by Pace on 05/07/2013.
- *
- */
-#include <sys/wait.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <glib.h>
-#include <dbus/dbus-glib.h>
-
 #include "../include/sh_daemon.h"
+
+#define ERROR_FORK 1
+#define ERROR_WAITPID 2
+#define ERROR_EXECVP 3
+#define ERROR_PERMISSION_DENIED 4
+#define ERROR_ARGS_NULL 5
 
 DBusGObjectInfo dbus_glib_psf_object_info;
 #define EXEC_PATH_SIZE 128
@@ -70,9 +59,16 @@ gboolean psf_exec (Psf *obj,
   int pipefd_out[2];
   int pipefd_err[2];
 
+
+  if (args[0] == NULL)
+  {
+    g_set_error (gerror, -1, ERROR_ARGS_NULL, "Binary to fork must be set as input\n");
+    return FALSE;
+  }
+
   if (strcmp (process, args[0]) != 0)
   {
-    fprintf(stderr, "Process %s : Permission denied\n", args[0]);
+    g_set_error (gerror, -1, ERROR_PERMISSION_DENIED, "Process %s : Permission denied\n", args[0]);
     *ret = -1;
     return FALSE;
   }
@@ -92,13 +88,18 @@ gboolean psf_exec (Psf *obj,
     close(pipefd_out[1]);
     close(pipefd_err[1]);
 
-    execvp ("/home/arthur/sh_daemon/mybinary", NULL);
-    perror ("execv");
-    return FALSE;
+    errno = 0;
+    execvp (args[0], NULL);
+    if (errno)
+    {
+      g_set_error (gerror, -1, ERROR_EXECVP, "Error during execvp : %d\n", errno);
+      return FALSE;
+    }
+    return TRUE;
   }
   else if (pid == -1)
   {
-    perror ("fork");
+    g_set_error (gerror, -1, ERROR_FORK, "Error during fork process\n");
     return FALSE;
   }
 
@@ -108,17 +109,10 @@ gboolean psf_exec (Psf *obj,
   close(pipefd_err[1]);
   while (read(pipefd_out[0], buf_stdout, sizeof(buf_stdout)) != 0);
   while (read(pipefd_err[0], buf_stderr, sizeof(buf_stderr)) != 0);
-  printf ("_______\n");
-  printf ("output : \n"); printf ("%s", buf_stdout);
-  printf ("_______\n");
-  printf ("error : \n"); printf ("%s", buf_stderr);
-  printf ("_______\n");
-  printf ("code retour : %d\n", WEXITSTATUS(status));
-  printf ("_______\n");
 
   if (waitpid(pid, &status, 0) == -1)
   {
-    perror ("waitpid");
+    g_set_error (gerror, -1, ERROR_WAITPID, "Error during waitpid\n");
     return FALSE;
   }
 

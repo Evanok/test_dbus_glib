@@ -24,7 +24,7 @@ const char *process = NULL;
 
 void init_dbus_gobject_info (DBusGObjectInfo* dbus_glib_psf_object_info, const char* dbus_name)
 {
-  char* psf_dbus_name = malloc (strlen(dbus_name) + EXEC_PATH_SIZE + 1); 
+  char* psf_dbus_name = malloc (strlen(dbus_name) + EXEC_PATH_SIZE + 1);
   int i;
   char* tmp = NULL;
 
@@ -74,7 +74,7 @@ gboolean psf_exec (Psf *obj,
   {
     fprintf(stderr, "Process %s : Permission denied\n", args[0]);
     *ret = -1;
-    return TRUE;
+    return FALSE;
   }
 
   pipe(pipefd_out);
@@ -92,42 +92,39 @@ gboolean psf_exec (Psf *obj,
     close(pipefd_out[1]);
     close(pipefd_err[1]);
 
-    execvp (process, args);
+    execvp ("/home/arthur/sh_daemon/mybinary", NULL);
     perror ("execv");
-    return TRUE;
+    return FALSE;
   }
   else if (pid == -1)
   {
     perror ("fork");
-    return TRUE;
+    return FALSE;
   }
-  else
+
+  char buf_stderr[1024];
+  char buf_stdout[1024];
+  close(pipefd_out[1]);
+  close(pipefd_err[1]);
+  while (read(pipefd_out[0], buf_stdout, sizeof(buf_stdout)) != 0);
+  while (read(pipefd_err[0], buf_stderr, sizeof(buf_stderr)) != 0);
+  printf ("_______\n");
+  printf ("output : \n"); printf ("%s", buf_stdout);
+  printf ("_______\n");
+  printf ("error : \n"); printf ("%s", buf_stderr);
+  printf ("_______\n");
+  printf ("code retour : %d\n", WEXITSTATUS(status));
+  printf ("_______\n");
+
+  if (waitpid(pid, &status, 0) == -1)
   {
-    if (waitpid(pid, &status, 0) == -1)
-    {
-      perror ("waitpid");
-    return TRUE;
-    }
-    else
-    {
-      char buf_stderr[1024];
-      char buf_stdout[1024];
-      close(pipefd_out[1]);
-      close(pipefd_err[1]);
-      while (read(pipefd_out[0], buf_stdout, sizeof(buf_stdout)) != 0);
-      while (read(pipefd_err[0], buf_stderr, sizeof(buf_stderr)) != 0);
-      printf ("_______\n");
-      printf ("output : \n"); printf ("%s", buf_stdout);
-      printf ("_______\n");
-      printf ("error : \n"); printf ("%s", buf_stderr);
-      printf ("_______\n");
-      printf ("code retour : %d\n", WEXITSTATUS(status));
-      printf ("_______\n");
-      *ret = status;
-      *output = strdup(buf_stdout);
-      *error = strdup(buf_stderr);
-    }
+    perror ("waitpid");
+    return FALSE;
   }
+
+  *ret = status;
+  *output = strdup(buf_stdout);
+  *error = strdup(buf_stderr);
 
   return TRUE;
 }

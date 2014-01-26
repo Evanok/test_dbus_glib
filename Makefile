@@ -31,6 +31,7 @@ clean:
 	gcc -o ./test/mybinary ./test/mybinary.c
 
 test_error: all ./test/mybinary
+	-sudo killall -9 sh_daemon
 	@./sh_daemon -e "./test/mybinary"  -n "org.arthurlambert.daemon" -p "/org/arthurlambert/daemon" &
 	@sleep 2
 	@echo "- - - - - - - - - - - - - - - - - - - - - - - - "
